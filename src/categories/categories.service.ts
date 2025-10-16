@@ -77,7 +77,6 @@ async updateBySlug(slug: string, updateCategoryDto: UpdateCategoryDto): Promise<
       throw new NotFoundException(`Category with slug "${slug}" not found`);
     }
 
-    // لو محذوف → نعمله restore
     if (category.isDeleted) {
       category.deletedAt = null;
       category.isDeleted = false;
@@ -85,7 +84,6 @@ async updateBySlug(slug: string, updateCategoryDto: UpdateCategoryDto): Promise<
       return { message: 'Category restored successfully' };
     }
 
-    // لو مش محذوف → نعمله soft delete
     category.deletedAt = new Date();
     category.isDeleted = true
     await category.save();

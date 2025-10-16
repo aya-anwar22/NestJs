@@ -1,3 +1,4 @@
+// ملف البداية (Entry file)، بيستخدم NestFactory لإنشاء تطبيق Nest.
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';

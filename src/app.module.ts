@@ -1,3 +1,4 @@
+//Root Module، الموديول الأساسي اللي بيجمع كل الموديولات التانية.
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
@@ -8,6 +9,8 @@ import { AuthModule } from './auth/auth.module';
 import { CategoriesModule } from './categories/categories.module';
 import { ServicesModule } from './services/services.module';
 import { PackagesModule } from './packages/packages.module';
+import { DevelopmentStageModule } from './development-stage/development-stage.module';
+import { ProjectModule } from './project/project.module';
 
 @Module({
   imports: [
@@ -24,6 +27,8 @@ import { PackagesModule } from './packages/packages.module';
     CategoriesModule,
     ServicesModule,
     PackagesModule,
+    DevelopmentStageModule,
+    ProjectModule,
   ],
   controllers: [AppController],
   providers: [AppService],

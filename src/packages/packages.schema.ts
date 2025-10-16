@@ -36,8 +36,9 @@ export class ServicePackage {
   @Prop({ default: false })
   isDeleted: boolean;
 
-  @Prop({ default: null })
-  deletedAt: Date;
+  @Prop({ type: Date, default: null })
+deletedAt: Date | null;
+
 }
 
 export const ServicePackageSchema = SchemaFactory.createForClass(ServicePackage);
