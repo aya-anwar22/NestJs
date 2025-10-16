@@ -18,48 +18,27 @@
 //   await app.listen(process.env.PORT ?? 3000);
 // }
 // bootstrap();
-
-
-
 import { NestFactory } from '@nestjs/core';
 import { ExpressAdapter } from '@nestjs/platform-express';
 import { ValidationPipe } from '@nestjs/common';
 import * as express from 'express';
 import { AppModule } from './app.module';
-import { Express, Request, Response } from 'express';
 
-const server: Express = express();
+const expressServer = express();
 
-let cachedServer: Express | null = null;
+// ✅ Global prefix لل routes
+const globalPrefix = 'api';
 
-// ✅ Vercel handler
-export default async function handler(req: Request, res: Response): Promise<void> {
-  if (!cachedServer) {
-    const app = await NestFactory.create(AppModule, new ExpressAdapter(server));
+let cachedNestApp: express.Express;
 
-    app.useGlobalPipes(
-      new ValidationPipe({
-        transform: true,
-        whitelist: true,
-        forbidNonWhitelisted: true,
-      }),
-    );
+async function bootstrapNest() {
+  const app = await NestFactory.create(
+    AppModule,
+    new ExpressAdapter(expressServer)
+  );
 
-    app.enableCors({
-      origin: '*',
-      methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-      credentials: false,
-    });
-
-    await app.init();
-    cachedServer = server;
-  }
-  return cachedServer(req, res);
-}
-
-// ✅ Local bootstrap
-async function bootstrap(): Promise<void> {
-  const app = await NestFactory.create(AppModule);
+  // Set global prefix
+  app.setGlobalPrefix(globalPrefix);
 
   app.useGlobalPipes(
     new ValidationPipe({
@@ -71,16 +50,33 @@ async function bootstrap(): Promise<void> {
 
   app.enableCors({
     origin: '*',
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: false,
   });
 
-  await app.listen(3000);
-  console.log('🚀 Local server running on http://localhost:3000');
+  await app.init();
+  return expressServer;
 }
 
-// ✅ شغّله محلي لو مش في production
+// ✅ Vercel handler
+export default async function handler(req: express.Request, res: express.Response) {
+  if (!cachedNestApp) {
+    console.log('🔄 Initializing NestJS app...');
+    cachedNestApp = await bootstrapNest();
+  }
+  
+  // Handle preflight requests
+  if (req.method === 'OPTIONS') {
+    res.status(200).end();
+    return;
+  }
+  
+  return cachedNestApp(req, res);
+}
+
+// ✅ Local development
 if (process.env.NODE_ENV !== 'production') {
-  bootstrap();
+  bootstrapNest().then(() => {
+    console.log(`🚀 Local server running on http://localhost:3000/${globalPrefix}`);
+  });
 }
-
