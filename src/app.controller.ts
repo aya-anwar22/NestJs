@@ -1,4 +1,3 @@
-// Controller أساسي بمسار واحد Route، بيتعامل مع الطلبات HTTP.
 import { Controller, Get } from '@nestjs/common';
 import { AppService } from './app.service';
 
